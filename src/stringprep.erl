@@ -78,7 +78,9 @@ handle_info(_, State) -> {noreply, State}.
 
 code_change(_OldVsn, State, _Extra) -> {ok, State}.
 
-terminate(_Reason, Port) -> Port ! {self, close}, ok.
+terminate(_Reason, Port) ->
+    catch port_close(Port),
+    ok.
 
 -spec tolower(binary()) -> binary() | error.
 

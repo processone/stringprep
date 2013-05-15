@@ -125,7 +125,7 @@ load_driver() ->
 get_so_path() ->
     case os:getenv("EJABBERD_SO_PATH") of
         false ->
-            case code:priv_dir(stringprep) of
+            case code:priv_dir(p1_stringprep) of
                 {error, _} ->
                     filename:join(["priv", "lib"]);
                 Path ->

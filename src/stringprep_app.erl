@@ -34,11 +34,11 @@
 %% @end
 %%--------------------------------------------------------------------
 start(_StartType, _StartArgs) ->
-    case stringprep_sup:start_link() of
-        {ok, Pid} ->
-            {ok, Pid};
-        Error ->
-            Error
+    case stringprep:load_nif() of
+        ok ->
+            stringprep_sup:start_link();
+        Err ->
+            Err
     end.
 
 %%--------------------------------------------------------------------

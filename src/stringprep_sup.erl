@@ -40,6 +40,4 @@ start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 init([]) ->
-    StringPrep = {stringprep, {stringprep, start_link, []},
-		  permanent, brutal_kill, worker, [stringprep]},
-    {ok, {{one_for_all, 10, 1}, [StringPrep]}}.
+    {ok, {{one_for_all, 10, 1}, []}}.

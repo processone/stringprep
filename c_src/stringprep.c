@@ -18,48 +18,16 @@
  *
  */
 
-#include <stdio.h>
 #include <string.h>
-#include <erl_driver.h>
-#include <ei.h>
+#include <erl_nif.h>
 
 #include "uni_data.c"
 #include "uni_norm.c"
 
+#define TOLOWER_COMMAND 0
 #define NAMEPREP_COMMAND 1
 #define NODEPREP_COMMAND 2
 #define RESOURCEPREP_COMMAND 3
-
-/*
- * R15B changed several driver callbacks to use ErlDrvSizeT and
- * ErlDrvSSizeT typedefs instead of int.
- * This provides missing typedefs on older OTP versions.
- */
-#if ERL_DRV_EXTENDED_MAJOR_VERSION < 2
-typedef int ErlDrvSizeT;
-typedef int ErlDrvSSizeT;
-#endif
-
-typedef struct {
-      ErlDrvPort port;
-} stringprep_data;
-
-
-static ErlDrvData stringprep_erl_start(ErlDrvPort port, char *buff)
-{
-   stringprep_data* d = (stringprep_data*)driver_alloc(sizeof(stringprep_data));
-   d->port = port;
-
-   set_port_control_flags(port, PORT_CONTROL_FLAG_BINARY);
-   
-   return (ErlDrvData)d;
-}
-
-static void stringprep_erl_stop(ErlDrvData handle)
-{
-   driver_free((char*)handle);
-}
-
 
 /* Hangul constants */
 #define SBase 0xAC00
@@ -147,43 +115,43 @@ static int compose(int ch1, int ch2)
 	 if (ruc <= 0x7F) {						\
 	    if (pos >= size) {						\
 	       size = 2*size + 1;					\
-	       rstring = driver_realloc_binary(rstring, size);		\
+	       rstring = enif_realloc(rstring, size);			\
 	    }								\
-	    rstring->orig_bytes[pos] = (char) ruc;			\
+	    rstring[pos] = (char) ruc;					\
 	    pos++;							\
 	 } else if (ruc <= 0x7FF) {					\
 	    if (pos + 1 >= size) {					\
 	       size = 2*size + 2;					\
-	       rstring = driver_realloc_binary(rstring, size);		\
+	       rstring = enif_realloc(rstring, size);			\
 	    }								\
-	    rstring->orig_bytes[pos] = (char) ((ruc >> 6) | 0xC0);	\
-	    rstring->orig_bytes[pos+1] = (char) ((ruc | 0x80) & 0xBF);	\
+	    rstring[pos] = (char) ((ruc >> 6) | 0xC0);			\
+	    rstring[pos+1] = (char) ((ruc | 0x80) & 0xBF);		\
 	    pos += 2;							\
 	 } else if (ruc <= 0xFFFF) {					\
 	    if (pos + 2 >= size) {					\
 	       size = 2*size + 3;					\
-	       rstring = driver_realloc_binary(rstring, size);		\
+	       rstring = enif_realloc(rstring, size);			\
 	    }								\
-	    rstring->orig_bytes[pos] = (char) ((ruc >> 12) | 0xE0);	\
-	    rstring->orig_bytes[pos+1] = (char) (((ruc >> 6) | 0x80) & 0xBF); \
-	    rstring->orig_bytes[pos+2] = (char) ((ruc | 0x80) & 0xBF);	\
+	    rstring[pos] = (char) ((ruc >> 12) | 0xE0);			\
+	    rstring[pos+1] = (char) (((ruc >> 6) | 0x80) & 0xBF);	\
+	    rstring[pos+2] = (char) ((ruc | 0x80) & 0xBF);		\
 	    pos += 3;							\
 	 } else if (ruc <= 0x1FFFFF) {					\
 	    if (pos + 3 >= size) {					\
 	       size = 2*size + 4;					\
-	       rstring = driver_realloc_binary(rstring, size);		\
+	       rstring = enif_realloc(rstring, size);			\
 	    }								\
-	    rstring->orig_bytes[pos] = (char) ((ruc >> 18) | 0xF0);	\
-	    rstring->orig_bytes[pos+1] = (char) (((ruc >> 12) | 0x80) & 0xBF); \
-	    rstring->orig_bytes[pos+2] = (char) (((ruc >> 6) | 0x80) & 0xBF); \
-	    rstring->orig_bytes[pos+3] = (char) ((ruc | 0x80) & 0xBF);	\
+	    rstring[pos] = (char) ((ruc >> 18) | 0xF0);			\
+	    rstring[pos+1] = (char) (((ruc >> 12) | 0x80) & 0xBF);	\
+	    rstring[pos+2] = (char) (((ruc >> 6) | 0x80) & 0xBF);	\
+	    rstring[pos+3] = (char) ((ruc | 0x80) & 0xBF);		\
 	    pos += 4;							\
 	 }
 
 #define ADD_UCHAR32(str, pos, len, ch)				\
 	    if (pos >= len) {					\
 	       len = 2*len + 1;					\
-	       str = driver_realloc(str, len * sizeof(int));	\
+	       str = enif_realloc(str, len * sizeof(int));	\
 	    }							\
 	    str[pos] = ch;					\
 	    pos++;
@@ -202,42 +170,54 @@ static int compose(int ch1, int ch2)
 		  ADD_UCHAR32(str32, str32pos, str32len, ruc);	\
 	       }
 
-
-
-static ErlDrvSSizeT stringprep_erl_control(ErlDrvData drv_data,
-				  unsigned int command,
-				  char *buf, ErlDrvSizeT len,
-				  char **rbuf, ErlDrvSizeT rlen)
+static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM load_info)
 {
-   int i, j, pos=1;
-   unsigned char c;
-   int bad = 0;
-   int uc = 0, ruc;
-   int size;
-   int info;
-   int prohibit = 0, tolower = 0;
-   ErlDrvBinary *rstring;
-   int *mc;
-   int *str32;
-   int str32len, str32pos = 0;
-   int decomp_len, decomp_shift;
-   int comp_pos, comp_starter_pos;
-   int cclass_prev, cclass2;
-   int ch1, ch2;
-   int first_ral, last_ral, have_ral, have_l;
+    return 0;
+}
 
-   size = len + 1;
+static ERL_NIF_TERM prep(ErlNifEnv* env, int argc,
+			 const ERL_NIF_TERM argv[], int command)
+{
+  ErlNifBinary input, output;
+  int i, j, pos=1;
+  unsigned char c;
+  int bad = 0;
+  int uc = 0, ruc;
+  int size;
+  int info;
+  int prohibit = 0, tolower = 0;
+  char *rstring;
+  int *mc;
+  int *str32;
+  int str32len, str32pos = 0;
+  int decomp_len, decomp_shift;
+  int comp_pos, comp_starter_pos;
+  int cclass_prev, cclass2;
+  int ch1, ch2;
+  int first_ral, last_ral, have_ral, have_l;
+  int len;
+  char *buf;
 
-   rstring = driver_alloc_binary(size);
-   rstring->orig_bytes[0] = 0;
+  if (argc != 1)
+    return enif_make_badarg(env);
 
-   str32len = len + 1;
+  if (!enif_inspect_iolist_as_binary(env, argv[0], &input))
+    return enif_make_badarg(env);
 
-   str32 = driver_alloc(str32len * sizeof(int));
+  buf = (char *) input.data;
+  len = input.size;
+
+  size = len + 1;
+
+  rstring = enif_alloc(size);
+
+  str32len = len + 1;
+
+  str32 = enif_alloc(str32len * sizeof(int));
 
    switch (command)
    {
-      case 0:
+      case TOLOWER_COMMAND:
 	 prohibit = ACMask;
 	 tolower = 1;
 	 break;
@@ -302,10 +282,9 @@ static ErlDrvSSizeT stringprep_erl_control(ErlDrvData drv_data,
       }
 
       if (bad) {
-	 driver_realloc_binary(rstring, 1);
-	 *rbuf = (char *)rstring;
-	 driver_free(str32);
-	 return 1;
+	 enif_free(rstring);
+	 enif_free(str32);
+	 return enif_make_atom(env, "error");
       }
       
       info = GetUniCharInfo(uc);
@@ -332,11 +311,10 @@ static ErlDrvSSizeT stringprep_erl_control(ErlDrvData drv_data,
    }
 
    if (str32pos == 0) {
-      driver_realloc_binary(rstring, 1);
-      rstring->orig_bytes[0] = 1;
-      *rbuf = (char *)rstring;
-      driver_free(str32);
-      return 1;
+     enif_free(rstring);
+     enif_free(str32);
+     enif_alloc_binary(0, &output);
+     return enif_make_binary(env, &output);
    }
 
    canonical_ordering(str32, str32pos);
@@ -375,10 +353,9 @@ static ErlDrvSSizeT stringprep_erl_control(ErlDrvData drv_data,
       ruc = str32[i];
       info = GetUniCharInfo(ruc);
       if (info & prohibit) {
-	 driver_realloc_binary(rstring, 1);
-	 *rbuf = (char *)rstring;
-	 driver_free(str32);
-	 return 1;
+	 enif_free(rstring);
+	 enif_free(str32);
+	 return enif_make_atom(env, "error");
       }
       last_ral = info & D1Mask;
       have_ral = have_ral || last_ral;
@@ -387,51 +364,48 @@ static ErlDrvSSizeT stringprep_erl_control(ErlDrvData drv_data,
    }
 
    if (have_ral && (!first_ral || !last_ral || have_l)) {
-      driver_realloc_binary(rstring, 1);
-      *rbuf = (char *)rstring;
-      driver_free(str32);
-      return 1;
+      enif_free(rstring);
+      enif_free(str32);
+      return enif_make_atom(env, "error");
    }
 
-   driver_realloc_binary(rstring, pos);
-   rstring->orig_bytes[0] = 1;
-   *rbuf = (char *)rstring;
-   driver_free(str32);
-   
-   return pos;
+   enif_alloc_binary(pos-1, &output);
+   memcpy(output.data, rstring+1, pos-1);
+   enif_free(rstring);
+   enif_free(str32);
+   return enif_make_binary(env, &output);
 }
 
-
-
-ErlDrvEntry stringprep_driver_entry = {
-   NULL,			/* F_PTR init, N/A */
-   stringprep_erl_start,	/* L_PTR start, called when port is opened */
-   stringprep_erl_stop,		/* F_PTR stop, called when port is closed */
-   NULL,			/* F_PTR output, called when erlang has sent */
-   NULL,			/* F_PTR ready_input, called when input descriptor ready */
-   NULL,			/* F_PTR ready_output, called when output descriptor ready */
-   "stringprep_drv",		/* char *driver_name, the argument to open_port */
-   NULL,			/* F_PTR finish, called when unloaded */
-   NULL,			/* handle */
-   stringprep_erl_control,	/* F_PTR control, port_command callback */
-   NULL,			/* F_PTR timeout, reserved */
-   NULL,			/* F_PTR outputv, reserved */
-  /* Added in Erlang/OTP R15B: */
-  NULL,                 /* ready_async */
-  NULL,                 /* flush */
-  NULL,                 /* call */
-  NULL,                 /* event */
-  ERL_DRV_EXTENDED_MARKER,        /* extended_marker */
-  ERL_DRV_EXTENDED_MAJOR_VERSION, /* major_version */
-  ERL_DRV_EXTENDED_MINOR_VERSION, /* minor_version */
-  0,                    /* driver_flags */
-  NULL,                 /* handle2 */
-  NULL,                 /* process_exit */
-  NULL                  /* stop_select */
-};
-
-DRIVER_INIT(stringprep_erl) /* must match name in driver_entry */
+static ERL_NIF_TERM nodeprep(ErlNifEnv* env, int argc,
+			     const ERL_NIF_TERM argv[])
 {
-    return &stringprep_driver_entry;
+  return prep(env, argc, argv, NODEPREP_COMMAND);
 }
 
+static ERL_NIF_TERM nameprep(ErlNifEnv* env, int argc,
+			     const ERL_NIF_TERM argv[])
+{
+  return prep(env, argc, argv, NAMEPREP_COMMAND);
+}
+
+static ERL_NIF_TERM resourceprep(ErlNifEnv* env, int argc,
+				 const ERL_NIF_TERM argv[])
+{
+  return prep(env, argc, argv, RESOURCEPREP_COMMAND);
+}
+
+static ERL_NIF_TERM to_lower(ErlNifEnv* env, int argc,
+			     const ERL_NIF_TERM argv[])
+{
+  return prep(env, argc, argv, TOLOWER_COMMAND);
+}
+
+static ErlNifFunc nif_funcs[] =
+  {
+    {"nodeprep", 1, nodeprep},
+    {"nameprep", 1, nameprep},
+    {"resourceprep", 1, resourceprep},
+    {"tolower", 1, to_lower}
+  };
+
+ERL_NIF_INIT(stringprep, nif_funcs, load, NULL, NULL, NULL)

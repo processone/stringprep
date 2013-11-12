@@ -302,6 +302,7 @@ static ErlDrvSSizeT stringprep_erl_control(ErlDrvData drv_data,
       }
 
       if (bad) {
+	 driver_realloc_binary(rstring, 1);
 	 *rbuf = (char *)rstring;
 	 driver_free(str32);
 	 return 1;
@@ -331,6 +332,7 @@ static ErlDrvSSizeT stringprep_erl_control(ErlDrvData drv_data,
    }
 
    if (str32pos == 0) {
+      driver_realloc_binary(rstring, 1);
       rstring->orig_bytes[0] = 1;
       *rbuf = (char *)rstring;
       driver_free(str32);
@@ -373,6 +375,7 @@ static ErlDrvSSizeT stringprep_erl_control(ErlDrvData drv_data,
       ruc = str32[i];
       info = GetUniCharInfo(ruc);
       if (info & prohibit) {
+	 driver_realloc_binary(rstring, 1);
 	 *rbuf = (char *)rstring;
 	 driver_free(str32);
 	 return 1;
@@ -384,11 +387,13 @@ static ErlDrvSSizeT stringprep_erl_control(ErlDrvData drv_data,
    }
 
    if (have_ral && (!first_ral || !last_ral || have_l)) {
+      driver_realloc_binary(rstring, 1);
       *rbuf = (char *)rstring;
       driver_free(str32);
       return 1;
    }
 
+   driver_realloc_binary(rstring, pos);
    rstring->orig_bytes[0] = 1;
    *rbuf = (char *)rstring;
    driver_free(str32);

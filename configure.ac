@@ -6,7 +6,7 @@ AC_PACKAGE_VERSION(0.1.0)
 AC_INIT(stringprep, 0.1.0, [], [])
 
 # Checks for programs.
-AC_PROG_CC
+AC_PROG_CC_C_O
 AC_PROG_MAKE_SET
 
 if test "x$GCC" = "xyes"; then
@@ -27,5 +27,6 @@ AC_ERLANG_NEED_ERLC
 # Checks and sets ERLANG_ROOT_DIR and ERLANG_LIB_DIR variable
 # AC_ERLANG_SUBST_ROOT_DIR
 # AC_ERLANG_SUBST_LIB_DIR
+PKG_CHECK_MODULES(IDN, [libidn], [],AC_MSG_ERROR([libidn was not found]))
 
-AC_OUTPUT
+AC_OUTPUT([rebar.config])

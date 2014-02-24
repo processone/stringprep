@@ -1,6 +1,6 @@
 {erl_opts, [debug_info]}.
 
-{port_env, [{"CFLAGS", "-g -O2 -Wall"}]}.
+{port_env, [{"CFLAGS", "$CFLAGS @IDN_CFLAGS@ -g -O2 -Wall"}, {"LDFLAGS", "$LDFLAGS @IDN_LIBS@"}]}.
 
 {port_specs, [{"priv/lib/stringprep.so", ["c_src/stringprep.c"]}]}.
 

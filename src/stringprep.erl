@@ -28,7 +28,7 @@
 
 -author('alexey@process-one.net').
 
--export([start/0, load_nif/0, load_nif/1, tolower/1, nameprep/1,
+-export([start/0, load_nif/0, tolower/1, nameprep/1,
 	 nodeprep/1, resourceprep/1]).
 
 %%%===================================================================
@@ -38,16 +38,11 @@ start() ->
     application:start(p1_stringprep).
 
 load_nif() ->
-    load_nif(get_so_path()).
-
-load_nif(LibDir) ->
-    SOPath = filename:join(LibDir, "stringprep"),
+    SOPath = p1_nif_utils:get_so_path(?MODULE, [stringprep, p1_strinprep], "stringprep"),
     case catch erlang:load_nif(SOPath, 0) of
-        ok ->
-            ok;
-        Err ->
-            error_logger:warning_msg("unable to load stringprep NIF: ~p~n", [Err]),
-            Err
+        ok -> ok;
+        Err -> error_logger:warning_msg("unable to load xml NIF: ~p~n", [Err]),
+               {error, unable_to_load_nif}
     end.
 
 -spec tolower(iodata()) -> binary() | error.
@@ -65,14 +60,6 @@ nodeprep(_String) ->
 -spec resourceprep(iodata()) -> binary() | error.
 resourceprep(_String) ->
     erlang:nif_error(nif_not_loaded).
-
-%%%===================================================================
-%%% Internal functions
-%%%===================================================================
-get_so_path() ->
-    EbinDir = filename:dirname(code:which(?MODULE)),
-    AppDir = filename:dirname(EbinDir),
-    filename:join([AppDir, "priv", "lib"]).
 
 %%%===================================================================
 %%% Unit tests

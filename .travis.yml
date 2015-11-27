@@ -6,7 +6,7 @@ before_install:
   - pip install --user cpp-coveralls coveralls-merge
 
 install:
-  - ./configure
+  - ./configure --enable-gcov
   - rebar get-deps
 
 script: rebar compile xref && rebar skip_deps=true eunit

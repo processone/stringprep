@@ -1,18 +1,38 @@
 %%%-------------------------------------------------------------------
-%%% @author Evgeniy Khramtsov <ekhramtsov@process-one.net>
-%%% @copyright (C) 2013, Evgeniy Khramtsov
-%%% @doc
+%%% Author  : Evgeniy Khramtsov <ekhramtsov@process-one.net>
+%%% Purpose : Application package description
+%%% Created : 4 Apr 2013 by Evgeniy Khramtsov <ekhramtsov@process-one.net>
 %%%
-%%% @end
-%%% Created :  4 Apr 2013 by Evgeniy Khramtsov <ekhramtsov@process-one.net>
+%%%
+%%% Copyright (C) 2002-2015 ProcessOne, SARL. All Rights Reserved.
+%%%
+%%% Licensed under the Apache License, Version 2.0 (the "License");
+%%% you may not use this file except in compliance with the License.
+%%% You may obtain a copy of the License at
+%%%
+%%%     http://www.apache.org/licenses/LICENSE-2.0
+%%%
+%%% Unless required by applicable law or agreed to in writing, software
+%%% distributed under the License is distributed on an "AS IS" BASIS,
+%%% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+%%% See the License for the specific language governing permissions and
+%%% limitations under the License.
+%%%
 %%%-------------------------------------------------------------------
+
 {application, p1_stringprep,
- [{description,  "stringprep wrapper"},
-  {vsn,          "0.1.0"},
+ [{description,  "Fast Stringprep Erlang / Elixir implementation"},
+  {vsn,          "1.0.0"},
   {modules,      []},
   {registered,   []},
   {applications, [kernel, stdlib]},
-  {mod,          {stringprep_app,[]}}]}.
+  {mod,          {stringprep_app,[]}},
+
+  %% hex.pm packaging:
+  {files, ["src/", "c_src/", "rebar.config", "rebar.config.script", "README.md", "LICENSE.txt", "LICENCE.ALL", "LICENSE.TCL"]},
+  {licenses, ["Apache 2.0", "Tcl/Tk"]},
+  {maintainers, ["ProcessOne"]},
+  {links, [{"Github", "https://github.com/processone/stringprep"}]}]}.
 
 %% Local Variables:
 %% mode: erlang

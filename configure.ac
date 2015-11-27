@@ -28,4 +28,17 @@ AC_ERLANG_NEED_ERLC
 # AC_ERLANG_SUBST_ROOT_DIR
 # AC_ERLANG_SUBST_LIB_DIR
 
+AC_ARG_ENABLE(gcov,
+[AC_HELP_STRING([--enable-gcov], [compile with gcov enabled (default: no)])],
+[case "${enableval}" in
+  yes) gcov=true ;;
+  no)  gcov=false ;;
+  *) AC_MSG_ERROR(bad value ${enableval} for --enable-gcov) ;;
+esac],[gcov=false])
+
+
+AC_SUBST(gcov)
+
+AC_CONFIG_FILES([vars.config])
+
 AC_OUTPUT

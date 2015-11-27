@@ -1,4 +1,4 @@
-{cflags, "@CFLAGS@"}.
+{cxxflags, "@CPPFLAGS@"}.
 {ldflags, "@LDFLAGS@ @LIBS@"}.
 {with_gcov, "@gcov@"}.
 

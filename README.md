@@ -1,5 +1,7 @@
 # Fast Stringprep implementation for Erlang / Elixir
 
+[![Build Status](https://travis-ci.org/processone/stringprep.svg?branch=master)](https://travis-ci.org/processone/stringprep) [![Coverage Status](https://coveralls.io/repos/processone/stringprep/badge.svg?branch=master&service=github)](https://coveralls.io/github/processone/stringprep?branch=master)
+
 Stringprep is a framework for preparing Unicode test strings in order
 to increase the likelihood that string input and string comparison
 work.

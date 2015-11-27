@@ -14,3 +14,4 @@ deps/
 
 *.eqc
 .eqc-info
+vars.config

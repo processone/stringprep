@@ -43,7 +43,7 @@ Fast Stringprep processing tool can be build as follow:
 It is a rebar-compatible OTP application. Alternatively, you can build
 it with rebar:
 
-    rebar compile
+    rebar get-deps compile
 
 ## Usage
 

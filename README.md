@@ -40,6 +40,9 @@ Fast Stringprep processing tool can be build as follow:
 
     ./configure && make
 
+Configure script recognizes one flag - pass `--enable-gcov` to enable gcov
+coverage reporting.
+
 It is a rebar-compatible OTP application. Alternatively, you can build
 it with rebar:
 

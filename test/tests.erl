@@ -4,7 +4,7 @@
 -compile(export_all).
 
 application_start_test() ->
-    ?assertEqual(ok, application:start(p1_stringprep)).
+    ?assertEqual(ok, application:start(stringprep)).
 
 badarg_test() ->
     ?assertError(badarg, stringprep:nodeprep(foo)),
@@ -288,4 +288,4 @@ vector_test() ->
                   end, Cases).
 
 application_stop_test() ->
-    ?assertEqual(ok, application:stop(p1_stringprep)).
+    ?assertEqual(ok, application:stop(stringprep)).

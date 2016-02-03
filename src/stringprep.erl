@@ -35,10 +35,10 @@
 %%% API functions
 %%%===================================================================
 start() ->
-    application:start(p1_stringprep).
+    application:start(stringprep).
 
 load_nif() ->
-    SOPath = p1_nif_utils:get_so_path(?MODULE, [stringprep, p1_strinprep], "stringprep"),
+    SOPath = p1_nif_utils:get_so_path(?MODULE, [stringprep], "stringprep"),
     case catch erlang:load_nif(SOPath, 0) of
         ok -> ok;
         Err -> error_logger:warning_msg("unable to load xml NIF: ~p~n", [Err]),

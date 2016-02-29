@@ -19,6 +19,7 @@
  */
 
 #include <string.h>
+#include <stdint.h>
 #include <erl_nif.h>
 
 #include "uni_data.c"

@@ -22,7 +22,7 @@
 
 {application, stringprep,
  [{description,  "Fast Stringprep Erlang / Elixir implementation"},
-  {vsn,          "1.0.4"},
+  {vsn,          "1.0.5"},
   {modules,      []},
   {registered,   []},
   {applications, [kernel, stdlib]},

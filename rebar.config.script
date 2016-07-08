@@ -31,15 +31,19 @@ Cfg = case file:consult("vars.config") of
 {with_gcov, CfgWithGCov} = lists:keyfind(with_gcov, 1, Cfg),
 
 ModCfg0 = fun(F, Cfg, [Key|Tail], Op, Default) ->
-                 {OldVal,PartCfg} = case lists:keytake(Key, 1, Cfg) of
-                                        {value, {_, V1}, V2} -> {V1, V2};
-                                        false -> {if Tail == [] -> Default; true -> [] end, Cfg}
+		  {K, I} = case Key of
+			       {Kv, Iv} -> {Kv, Iv};
+			       Kv2 -> {Kv2, 1}
+			   end,
+                 {OldVal, Idx, PartCfg} = case lists:keytake(K, I, Cfg) of
+                                        {value, V1, V2} -> {V1, I+1, V2};
+                                        false -> {{K, if Tail == [] -> Default; true -> [] end}, 2, Cfg}
                                     end,
                  case Tail of
                      [] ->
-                         [{Key, Op(OldVal)} | PartCfg];
+                         [setelement(Idx, OldVal, Op(element(Idx, OldVal))) | PartCfg];
                      _ ->
-                         [{Key, F(F, OldVal, Tail, Op, Default)} | PartCfg]
+                         [setelement(Idx, OldVal, F(F, element(Idx, OldVal), Tail, Op, Default)) | PartCfg]
                  end
          end,
 ModCfg = fun(Cfg, Keys, Op, Default) -> ModCfg0(ModCfg0, Cfg, Keys, Op, Default) end.
@@ -67,7 +71,13 @@ Cfg2 = case IsRebar3 of
                                                     end, DepsList)
                          end,
                RB1 = ModCfg(CONFIG, [deps], DepsFun, []),
-               ModCfg(RB1, [plugins], fun(V) -> V ++ [rebar3_hex] end, []);
+               RB2 = ModCfg(RB1, [plugins], fun(V) -> V ++ [rebar3_hex, pc] end, []),
+               ModCfg(RB2, [provider_hooks], fun(V) -> V ++ [{pre,
+							      [
+							       {compile, {pc, compile}},
+							       {clean, {pc, clean}}
+							      ]
+							     }] end, []);
            false ->
                CONFIG
        end,
@@ -76,7 +86,7 @@ Cfg3 = case CfgWithGCov of
            "true" ->
                V1 = ModCfg(Cfg2, [post_hooks], fun(V) -> V ++ [{eunit, "gcov -o c_src stringprep"},
                                                                {eunit, "mv *.gcov .eunit/"}] end, []),
-               V2 = ModCfg(V1, [port_env, "LDFLAGS"], fun(V) -> V ++ " --coverage" end, ""),
+               V2 = ModCfg(V1, [port_env, {"LDFLAGS", 2}], fun(V) -> V ++ " --coverage" end, ""),
                ModCfg(V2, [port_env, "CXXFLAGS"], fun(V) -> V ++ " --coverage" end, "");
            _ ->
                Cfg2
@@ -94,6 +104,7 @@ Config = case os:getenv("TRAVIS") of
          end,
 
 Config.
+
 
 %% Local Variables:
 %% mode: erlang

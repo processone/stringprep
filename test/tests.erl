@@ -4,7 +4,8 @@
 -compile(export_all).
 
 application_start_test() ->
-    ?assertEqual(ok, application:start(stringprep)).
+    ?assertEqual({ok, [p1_utils, stringprep]},
+                 application:ensure_all_started(stringprep)).
 
 badarg_test() ->
     ?assertError(badarg, stringprep:nodeprep(foo)),

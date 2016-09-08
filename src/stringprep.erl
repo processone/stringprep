@@ -28,6 +28,8 @@
 
 -author('alexey@process-one.net').
 
+-compile(no_native).
+
 -export([start/0, load_nif/0, tolower/1, nameprep/1,
 	 nodeprep/1, resourceprep/1]).
 

@@ -37,7 +37,10 @@
 %%% API functions
 %%%===================================================================
 start() ->
-    application:start(stringprep).
+    case application:ensure_all_started(stringprep) of
+        {ok, _} -> ok;
+        Er -> Er
+    end.
 
 load_nif() ->
     SOPath = p1_nif_utils:get_so_path(?MODULE, [stringprep], "stringprep"),

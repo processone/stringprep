@@ -3,8 +3,10 @@
 -include_lib("eunit/include/eunit.hrl").
 -compile(export_all).
 
-application_start_test() ->
-    ?assertEqual(ok, application:start(stringprep)).
+application_start_test_() ->
+    [ ?_assertEqual({ok, [p1_utils, stringprep]},
+                    application:ensure_all_started(stringprep)),
+      ?_assertEqual(ok, stringprep:start()) ].
 
 badarg_test() ->
     ?assertError(badarg, stringprep:nodeprep(foo)),

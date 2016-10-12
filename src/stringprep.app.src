@@ -25,7 +25,7 @@
   {vsn,          "1.0.5"},
   {modules,      []},
   {registered,   []},
-  {applications, [kernel, stdlib]},
+  {applications, [kernel, stdlib, p1_utils]},
   {mod,          {stringprep_app,[]}},
 
   %% hex.pm packaging:

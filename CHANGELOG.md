@@ -1,3 +1,9 @@
+# Version 1.0.7
+
+* Use p1_utils 1.0.6 (Christophe Romain)
+* Fix tests (Radek Szymczyszyn)
+* Make sure stringprep isn't compiled to native code (Holger Weiss)
+
 # Version 1.0.6
 
 * Use p1_utils v1.0.5 (Mickaël Rémond)

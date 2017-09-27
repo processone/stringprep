@@ -1,3 +1,7 @@
+# Version 1.0.10
+
+* Updating p1_utils to version 1.0.10.
+
 # Version 1.0.9
 
 * depends on p1_utils-1.0.9

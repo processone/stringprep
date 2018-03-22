@@ -1,3 +1,8 @@
+# Version 1.0.11
+
+* Fix compilation with rebar3
+* Update FSF address
+
 # Version 1.0.10
 
 * Updating p1_utils to version 1.0.10.

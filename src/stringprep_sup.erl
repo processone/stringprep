@@ -5,7 +5,7 @@
 %%% Created : 29 Jun 2007 by Mickael Remond <mremond@process-one.net>
 %%%
 %%%
-%%% stringprep, Copyright (C) 2002-2017   ProcessOne
+%%% stringprep, Copyright (C) 2002-2019   ProcessOne
 %%%
 %%% This program is free software; you can redistribute it and/or
 %%% modify it under the terms of the GNU General Public License as

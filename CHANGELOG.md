@@ -1,3 +1,8 @@
+# Version 1.0.15
+
+* Add contribution guide
+* Fix license discrepancies
+
 # Version 1.0.14
 
 * Updating p1_utils to version 1.0.13.

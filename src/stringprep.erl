@@ -28,7 +28,7 @@
 -compile(no_native).
 
 -export([start/0, load_nif/0, tolower/1, nameprep/1,
-	 nodeprep/1, resourceprep/1]).
+	 nodeprep/1, resourceprep/1, tolower_nofilter/1]).
 
 %%%===================================================================
 %%% API functions
@@ -49,6 +49,10 @@ load_nif() ->
 
 -spec tolower(iodata()) -> binary() | error.
 tolower(_String) ->
+    erlang:nif_error(nif_not_loaded).
+
+-spec tolower_nofilter(iodata()) -> binary() | error.
+tolower_nofilter(_String) ->
     erlang:nif_error(nif_not_loaded).
 
 -spec nameprep(iodata()) -> binary() | error.

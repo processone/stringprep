@@ -516,12 +516,18 @@ static ERL_NIF_TERM to_lower(ErlNifEnv *env, int argc,
   return prep(env, argc, argv, ACMask, 1);
 }
 
+static ERL_NIF_TERM to_lower_no_filter(ErlNifEnv *env, int argc,
+							 const ERL_NIF_TERM argv[]) {
+  return prep(env, argc, argv, 0, 1);
+}
+
 static ErlNifFunc nif_funcs[] =
 	{
 		{"nodeprep", 1, nodeprep},
 		{"nameprep", 1, nameprep},
 		{"resourceprep", 1, resourceprep},
-		{"tolower", 1, to_lower}
+		{"tolower", 1, to_lower},
+		{"tolower_nofilter", 1, to_lower_no_filter}
 	};
 
 ERL_NIF_INIT(stringprep, nif_funcs, load, NULL, NULL, NULL)

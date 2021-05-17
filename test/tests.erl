@@ -8,6 +8,12 @@ application_start_test_() ->
                     application:ensure_all_started(stringprep)),
       ?_assertEqual(ok, stringprep:start()) ].
 
+application_start_stop_start_test_() ->
+    [ ?_assertEqual({ok, []},
+                    application:ensure_all_started(stringprep)),
+      ?_assertEqual(ok, application:stop(stringprep)),
+      ?_assertEqual(ok, stringprep:start()) ].
+
 badarg_test() ->
     ?assertError(badarg, stringprep:nodeprep(foo)),
     ?assertError(badarg, stringprep:nameprep(123)),

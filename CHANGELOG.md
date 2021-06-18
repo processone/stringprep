@@ -1,3 +1,8 @@
+# Version 1.0.26
+
+* Add tolower_nofilter function
+* Don't throw errors if nif library is already loaded
+
 # Version 1.0.25
 
 * Updating p1_utils to version 1.0.22.

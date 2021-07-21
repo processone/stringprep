@@ -1,3 +1,7 @@
+# Version 1.0.27
+
+* Switch from using Travis to Github Actions as CI
+
 # Version 1.0.26
 
 * Add tolower_nofilter function

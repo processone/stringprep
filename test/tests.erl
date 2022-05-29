@@ -4,7 +4,7 @@
 -compile(export_all).
 
 application_start_test_() ->
-    [ ?_assertEqual({ok, [p1_utils, stringprep]},
+    [ ?_assertEqual({ok, [compiler, p1_utils, stringprep]},
                     application:ensure_all_started(stringprep)),
       ?_assertEqual(ok, stringprep:start()) ].
 

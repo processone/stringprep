@@ -1,3 +1,7 @@
+# Version 1.0.30
+
+* Updating p1_utils to version 1.0.26.
+
 # Version 1.0.29
 
 * Make test more robust

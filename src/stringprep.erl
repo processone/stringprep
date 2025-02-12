@@ -22,13 +22,13 @@
 %%%----------------------------------------------------------------------
 
 -module(stringprep).
+-on_load(load_nif/0).
+-nifs([tolower/1, tolower_nofilter/1, nameprep/1, nodeprep/1, resourceprep/1]).
 
 -author('alexey@process-one.net').
 
--compile(no_native).
-
--export([start/0, load_nif/0, tolower/1, nameprep/1,
-	 nodeprep/1, resourceprep/1, tolower_nofilter/1]).
+-export([start/0, tolower/1, nameprep/1,
+         nodeprep/1, resourceprep/1, tolower_nofilter/1]).
 
 %%%===================================================================
 %%% API functions

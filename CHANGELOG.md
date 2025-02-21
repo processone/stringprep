@@ -1,3 +1,7 @@
+# Version 1.0.31
+
+* use on_load attribute for nif loading
+
 # Version 1.0.30
 
 * Updating p1_utils to version 1.0.26.

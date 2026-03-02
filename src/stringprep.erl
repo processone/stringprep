@@ -41,11 +41,15 @@ start() ->
 
 load_nif() ->
     SOPath = p1_nif_utils:get_so_path(?MODULE, [stringprep], "stringprep"),
-    case catch erlang:load_nif(SOPath, 0) of
+    try erlang:load_nif(SOPath, 0) of
         ok -> ok;
         {error, {reload, _}} -> ok;
         Err -> error_logger:warning_msg("unable to load stringprep NIF: ~p~n", [Err]),
                {error, unable_to_load_nif}
+    catch
+        _:Error ->
+            error_logger:warning_msg("unable to load stringprep NIF: ~p~n", [Error]),
+            {error, unable_to_load_nif}
     end.
 
 -spec tolower(iodata()) -> binary() | error.
